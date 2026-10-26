@@ -27,10 +27,18 @@ jobs:
           flutter build apk --release
           cp build/app/outputs/flutter-apk/app-release.apk app-release.apk
 
+      - name: Sign APK for install verification
+        run: |
+          keytool -genkeypair -keystore test.keystore -alias test -keyalg RSA -keysize 2048 -validity 3650 -storepass testpass -keypass testpass -dname "CN=Hengxin,O=Hengxin,C=CN"
+          APKSIGNER=$(find "$ANDROID_HOME" -name apksigner -type f 2>/dev/null | head -n1)
+          echo "apksigner: $APKSIGNER"
+          "$APKSIGNER" sign --ks test.keystore --ks-pass pass:testpass --key-pass pass:testpass --ks-key-alias test --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out app-release-signed.apk app-release.apk
+          ls -la app-release-signed.apk
+
       - uses: actions/upload-artifact@v7
         with:
           name: android-release
-          path: app-release.apk
+          path: app-release-signed.apk
           if-no-files-found: error
           retention-days: 7
 
@@ -61,7 +69,7 @@ jobs:
             pwd
             ls -la
             adb wait-for-device
-            adb install -r app-release.apk
+            adb install -r app-release-signed.apk
             adb shell am start -W -n org.traccar.client/org.traccar.client.MainActivity
             sleep 10
             adb shell pidof org.traccar.client > /dev/null || { echo "App process not running after launch — crashed."; exit 1; }
