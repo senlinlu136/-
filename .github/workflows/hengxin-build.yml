@@ -25,12 +25,12 @@ jobs:
         run: |
           flutter pub get
           flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk app-release.apk
 
       - uses: actions/upload-artifact@v7
         with:
           name: android-release
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
+          path: app-release.apk
           if-no-files-found: error
           retention-days: 7
 
@@ -58,10 +58,10 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
+            pwd
+            ls -la
             adb wait-for-device
-            APK=$(find . -name 'app-release.apk' -print -quit)
-            echo "APK path: $APK"
-            adb install -r "$APK"
+            adb install -r app-release.apk
             adb shell am start -W -n org.traccar.client/org.traccar.client.MainActivity
             sleep 10
             adb shell pidof org.traccar.client > /dev/null || { echo "App process not running after launch — crashed."; exit 1; }
