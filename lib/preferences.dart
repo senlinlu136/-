@@ -48,13 +48,14 @@ class Preferences {
     if (instance.getString(id) == null) {
       await instance.setString(id, (Random().nextInt(90000000) + 10000000).toString());
       await instance.setString(url, 'http://119.29.87.231:5555');
-      await instance.setString(accuracy, 'medium');
       await instance.setInt(distance, 75);
       await instance.setBool(buffer, true);
       await instance.setBool(stopDetection, true);
     }
-    // 强制上报间隔为5秒（每次启动都覆盖，确保升级用户也生效）
+    // 强制默认配置（每次启动都覆盖，确保升级用户也生效）
     await instance.setInt(interval, 5);
+    await instance.setString(accuracy, 'highest');
+    await instance.setBool(preferPlatformProviders, true);
   }
 
   static Config buildConfig() {
@@ -63,10 +64,10 @@ class Preferences {
       deviceId: instance.getString(id) ?? '',
       location: LocationConfig(
         accuracy: switch (instance.getString(accuracy)) {
-          'highest' => Accuracy.highest,
           'high' => Accuracy.high,
           'low' => Accuracy.low,
-          _ => Accuracy.medium,
+          'medium' => Accuracy.medium,
+          _ => Accuracy.highest,
         },
         distanceMeters: instance.getInt(distance) ?? 75,
         intervalSeconds: 5,
@@ -76,7 +77,7 @@ class Preferences {
       ),
       wakeLock: instance.getBool(wakelock) ?? false,
       buffer: instance.getBool(buffer) ?? true,
-      preferPlatformProviders: instance.getBool(preferPlatformProviders) ?? false,
+      preferPlatformProviders: instance.getBool(preferPlatformProviders) ?? true,
     );
   }
 }
