@@ -49,11 +49,12 @@ class Preferences {
       await instance.setString(id, (Random().nextInt(90000000) + 10000000).toString());
       await instance.setString(url, 'http://119.29.87.231:5555');
       await instance.setString(accuracy, 'medium');
-      await instance.setInt(interval, 300);
       await instance.setInt(distance, 75);
       await instance.setBool(buffer, true);
       await instance.setBool(stopDetection, true);
     }
+    // 强制上报间隔为5秒（每次启动都覆盖，确保升级用户也生效）
+    await instance.setInt(interval, 5);
   }
 
   static Config buildConfig() {
@@ -68,7 +69,7 @@ class Preferences {
           _ => Accuracy.medium,
         },
         distanceMeters: instance.getInt(distance) ?? 75,
-        intervalSeconds: instance.getInt(interval) ?? 300,
+        intervalSeconds: 5,
         angleDegrees: instance.getInt(angle) ?? 0,
         heartbeatIntervalSeconds: instance.getInt(heartbeat) ?? 0,
         stopDetection: instance.getBool(stopDetection) ?? true,
